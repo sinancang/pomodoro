@@ -1,29 +1,23 @@
 package pomodoro;
 import java.util.*;
 
-// to do's:
-// - add time limit: timer stops when time reaches limit
-
-
+// run redefined to add one second to the time and display it.
 class Helper extends TimerTask {
-	Time time = new Time();
+	Time time;
 	int limit;
 	
-	Helper (int n){
+	Helper (int n, Time t){
 		limit = n;
+		time = t;
 	}
 	
     public void run() {
-    	if (time.getTime() != limit) {
-    		time.addSec();
-    		time.displayTime();
-    	} else {
-    		System.out.println("Ding! Time's up!");
-    		return;
-    	}
+    	time.addSec();
+    	time.displayTime();
     }
 }
 
+// Time object to keep track of time passed
 class Time {
 	int[] time = new int[] {0,0,0,0};
 	boolean up = false;
@@ -50,6 +44,7 @@ class Time {
 		}
 	}
 	
+	// getTime only needs to return the minute part of time
 	public int getTime() {
 		String s1 = Integer.toString(time[0]);
 		String s2 = Integer.toString(time[1]);
@@ -65,13 +60,27 @@ class Time {
 public class MAIN {
 	public static void main(String[] args){
 		Scanner sc = new Scanner(System.in);
+		
 		System.out.println("For how long should the timer go? (in mins)");
+		
 		int n = sc.nextInt();
 		sc.close();
 		
+		Time t = new Time();
+		
 		Timer pomodoro = new Timer();
-		TimerTask task = new Helper(n);
-	
+		TimerTask task = new Helper(n, t);
+		// scheduled to execute run() every 1 second, after an initial 1 second
 		pomodoro.schedule(task, 1000, 1000);
+		
+		// constant check if time is up
+		while (true) {
+			// cancels timer when time limit reached
+			if (t.getTime() == n) {
+				pomodoro.cancel();
+				System.out.println("Ding! Time's up!");
+				break;
+			}
+		}
 	}
 }
